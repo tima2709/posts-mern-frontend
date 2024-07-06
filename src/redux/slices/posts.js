@@ -25,7 +25,7 @@ const initialState = {
     tags: {
         items: [],
         status: 'loading'
-    }
+    },
 };
 
 const postsSlice = createSlice({
@@ -64,10 +64,6 @@ const postsSlice = createSlice({
             .addCase(fetchRemovePosts.pending, (state, action) => {
                 state.posts.items = state.posts.items.filter(obj => obj._id !== action?.meta.arg)
             })
-            // .addCase(fetchRemovePosts.rejected, (state) => {
-            //     state.posts.items = [];
-            //     state.posts.status = 'error'
-            // })
     }
 })
 

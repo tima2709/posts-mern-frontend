@@ -5,11 +5,15 @@ import CommentsBlock from "../components/CommentsBlock";
 import Index from "../components/AddComment";
 import {useParams} from "react-router-dom";
 import axios from "../axios";
+import {useDispatch, useSelector} from "react-redux";
+import {addNewComments, getComments} from "../redux/slices/comments";
 
 const FullPost = () => {
+    const dispatch = useDispatch()
     const {id} = useParams()
     const [data, setData] = useState()
     const [loading, setLoading] = useState(true)
+    const [comment, setComment] = useState('')
 
     useEffect(() => {
         if (id) {
@@ -20,8 +24,20 @@ const FullPost = () => {
                 console.warn(err)
                 alert('Ошибка при получении статьи')
             })
+            dispatch(getComments(id))
         }
     },[id])
+
+    const comments = useSelector(state => state.comments.comments)
+
+    const handleAddNewComment = async () => {
+        await dispatch(addNewComments({
+            title: comment,
+            postId: id
+        }))
+        setComment('')
+        await dispatch(getComments(id))
+    }
 
     if (loading) {
         return <Post isLoading={loading} isFullPost/>
@@ -32,8 +48,7 @@ const FullPost = () => {
             <Post
                 _id={data._id}
                 title={data.title}
-                imageUrl={data?.imageUrl ? `${process.env.REACT_APP_API_URL}${data?.imageUrl}` : ''}
-                // imageUrl="https://res.cloudinary.com/practicaldev/image/fetch/s--UnAfrEG8--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/icohm5g0axh9wjmu4oc3.png"
+                imageUrl={data?.imageUrl ? `${data?.imageUrl}` : ''}
                 user={data.user}
                 createdAt={data.createdAt}
                 viewsCount={data.viewsCount}
@@ -44,25 +59,14 @@ const FullPost = () => {
                 <ReactMarkdown children={data.text}/>
             </Post>
             <CommentsBlock
-                items={[
-                    {
-                        user: {
-                            fullName: "Вася Пупкин",
-                            avatarUrl: "https://mui.com/static/images/avatar/1.jpg",
-                        },
-                        text: "Это тестовый комментарий 555555",
-                    },
-                    {
-                        user: {
-                            fullName: "Иван Иванов",
-                            avatarUrl: "https://mui.com/static/images/avatar/2.jpg",
-                        },
-                        text: "When displaying three lines or more, the avatar is not aligned at the top. You should set the prop to align the avatar at the top",
-                    },
-                ]}
+                items={comments.items}
                 isLoading={false}
             >
-                <Index/>
+                <Index
+                    setComment={setComment}
+                    comment={comment}
+                    handleAddNewComment={handleAddNewComment}
+                />
             </CommentsBlock>
         </>
     );

@@ -18,7 +18,7 @@ const Home = () => {
     useEffect(() => {
         dispatch(fetchPosts())
         dispatch(fetchTags())
-    }, [])
+    }, [dispatch])
 
 
     return (
@@ -31,20 +31,19 @@ const Home = () => {
                 <Grid xs={8} item>
                     {(isPostsLoading ? [...Array(5)] : posts.items).map((obj, idx) =>
                         isPostsLoading ? (
-                            <Post key={idx} isLoading={true}/>
+                            <Post key={idx} isLoading={isPostsLoading}/>
 
                         ) : (
                             <Post
                                 _id={obj._id}
                                 title={obj.title}
-                                imageUrl={obj?.imageUrl ? `http://localhost:4444${obj?.imageUrl}` : ''}
-                                // imageUrl="https://res.cloudinary.com/practicaldev/image/fetch/s--UnAfrEG8--/c_imagga_scale,f_auto,fl_progressive,h_420,q_auto,w_1000/https://dev-to-uploads.s3.amazonaws.com/uploads/articles/icohm5g0axh9wjmu4oc3.png"
+                                imageUrl={obj?.imageUrl ? `${obj?.imageUrl}` : ''}
                                 user={obj.user}
                                 createdAt={obj.createdAt}
                                 viewsCount={obj.viewsCount}
                                 commentsCount={3}
                                 tags={obj.tags}
-                                isEditable={userData?._id === obj.user._id}
+                                isEditable={userData?._id === obj?.user._id}
                             />
                         ))}
                 </Grid>

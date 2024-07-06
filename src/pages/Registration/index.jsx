@@ -1,21 +1,41 @@
-import React from 'react';
+import React, {useState, useRef} from 'react';
 import styles from './Login.module.scss';
 import {Avatar, Button, Paper, TextField, Typography} from "@mui/material";
 import {useDispatch, useSelector} from "react-redux";
-import { fetchRegister, selectIsAuth} from "../../redux/slices/auth";
+import {fetchRegister, selectIsAuth} from "../../redux/slices/auth";
 import {useForm} from "react-hook-form";
 import {Navigate} from "react-router-dom";
+import axios from "axios";
 
 const Registration = () => {
+    const [imageUrl, setImageUrl] = useState('')
     const dispatch = useDispatch()
+    const inputRef = useRef()
     const isAuth = useSelector(selectIsAuth)
-    const {register, handleSubmit, formState: {errors}} = useForm({
+
+    const {register, handleSubmit, setValue, formState: {errors}} = useForm({
         defaultValues: {
             fullName: 'Vasya',
             email: 'Vasya@test.kg',
-            password: '1234'
+            password: '12345'
         },
     })
+
+    const handleChangeFile = async (event) => {
+        const formData = new FormData();
+        const file = event.target.files[0];
+        formData.append('file', file);
+        formData.append('upload_preset', 'ifykirnt');
+        try {
+            const response = await axios.post('https://api.cloudinary.com/v1_1/dpqnzuhp5/image/upload', formData);
+            const imageUrl = response.data.url; // Получаем URL изображения
+            setImageUrl(imageUrl);
+            setValue('avatarUrl', imageUrl)
+        } catch (err) {
+            console.log(err);
+            alert('Ошибка при загрузке файла');
+        }
+    };
 
     const onSubmit = async (value) => {
         const data = await dispatch(fetchRegister(value))
@@ -33,23 +53,32 @@ const Registration = () => {
         return <Navigate to="/login"/>
     }
 
+    console.log(imageUrl, 'url')
+
     return (
         <Paper classes={{root: styles.root}}>
             <Typography classes={{root: styles.title}} variant="h5">
                 Создание аккаунта
             </Typography>
             <div className={styles.avatar}>
-                <Avatar sx={{width: 100, height: 100}}/>
+                <Avatar sx={{width: 100, height: 100}} src={imageUrl}/>
             </div>
             <form onSubmit={handleSubmit(onSubmit)}>
+                <Button onClick={() => inputRef.current.click()} variant="contained">Загрузить фото</Button>
+                <input
+                    onChange={handleChangeFile}
+                    ref={inputRef}
+                    type="file"
+                    hidden
+                />
                 <TextField
-                className={styles.field}
-                label="Полное имя"
-                error={Boolean(errors.fullName?.message)}
-                helperText={errors.fullName?.message}
-                {...register('fullName', {required: 'Укажите имя'})}
-                fullWidth
-            />
+                    className={styles.field}
+                    label="Полное имя"
+                    error={Boolean(errors.fullName?.message)}
+                    helperText={errors.fullName?.message}
+                    {...register('fullName', {required: 'Укажите имя'})}
+                    fullWidth
+                />
                 <TextField
                     className={styles.field}
                     label="E-Mail"

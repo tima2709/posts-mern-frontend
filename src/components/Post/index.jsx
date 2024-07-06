@@ -23,12 +23,13 @@ const Post = ({
                   tags,
                   children,
                   isFullPost,
-                  isLoading,
+                  isLoading = false,
                   isEditable,
               }) => {
 const dispatch = useDispatch()
+
     if (isLoading) {
-        return <PostSkeleton/>;
+        return <PostSkeleton/>
     }
 
     const onClickRemove = () => {
@@ -62,10 +63,10 @@ const dispatch = useDispatch()
                 <UserInfo {...user} additionalText={createdAt}/>
                 <div className={styles.indention}>
                     <h2 className={clsx(styles.title, {[styles.titleFull]: isFullPost})}>
-                        {isFullPost ? title : <a href={`/posts/${_id}`}>{title}</a>}
+                        {isFullPost ? title : <Link to={`/posts/${_id}`}>{title}</Link>}
                     </h2>
                     <ul className={styles.tags}>
-                        {tags.map((name) => (
+                        {tags?.map((name) => (
                             <li key={name}>
                                 <Link to={`/tag/${name}`}>#{name}</Link>
                             </li>

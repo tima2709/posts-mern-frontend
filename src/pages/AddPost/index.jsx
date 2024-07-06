@@ -5,9 +5,10 @@ import SimpleMDE from 'react-simplemde-editor'
 import {Link, Navigate, useNavigate, useParams} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {selectIsAuth} from "../../redux/slices/auth";
-
+import axios from 'axios';
+import instance from '../../axios'
 import 'easymde/dist/easymde.min.css'
-import axios from "../../axios";
+
 
 const AddPost = () => {
     const {id} = useParams()
@@ -23,15 +24,17 @@ const AddPost = () => {
     const isEditing = Boolean(id);
 
     const handleChangeFile = async (event) => {
+        const formData = new FormData();
+        const file = event.target.files[0];
+        formData.append('file', file);
+        formData.append('upload_preset', 'ifykirnt');
         try {
-            const formData = new FormData();
-            const file = event.target.files[0]
-            formData.append('image', file)
-            const {data} = await axios.post('/upload', formData)
-            setImageUrl(data.url)
+            const response = await axios.post('https://api.cloudinary.com/v1_1/dpqnzuhp5/image/upload', formData);
+            const imageUrl = response.data.url; // Получаем URL изображения
+            setImageUrl(imageUrl); // Устанавливаем URL изображения в состояние
         } catch (err) {
-            console.warn(err)
-            alert('Ошибка при загрузке файла')
+            console.log(err);
+            alert('Ошибка при загрузке файла');
         }
     };
 
@@ -56,8 +59,8 @@ const AddPost = () => {
             }
 
             const {data} = isEditing
-                ? await axios.patch(`/posts/${id}`, fields)
-                : await axios.post('/posts', fields)
+                ? await instance.patch(`/posts/${id}`, fields)
+                : await instance.post('/posts', fields)
 
             const _id = isEditing ? id : data._id;
 
@@ -71,7 +74,7 @@ const AddPost = () => {
 
     useEffect(() => {
         if (id) {
-            axios.get(`/posts/${id}`).then(({data}) => {
+            instance.get(`/posts/${id}`).then(({data}) => {
                 setText(data.text);
                 setTitle(data.title);
                 setTags(data.tags.join(','));
@@ -81,7 +84,7 @@ const AddPost = () => {
                 alert('Ошибка при получении статьи')
             })
         }
-    },[])
+    }, [])
 
     const options = React.useMemo(
         () => ({
@@ -115,7 +118,7 @@ const AddPost = () => {
                     </Button>
                     <img
                         className={styles.image}
-                        src={`${process.env.REACT_APP_API_URL}${imageUrl}`}
+                        src={imageUrl}
                         alt="Uploaded"
                     />
                 </>

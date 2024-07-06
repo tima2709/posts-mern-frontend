@@ -19,7 +19,7 @@ const dispatch = useDispatch()
             <Container maxWidth="lg">
                 <div className={styles.inner}>
                     <Link className={styles.logo} to="/">
-                        <div>ARCHAKOV BLOG</div>
+                        <div>KOON BLOG</div>
                     </Link>
                     <div className={styles.buttons}>
                         {isAuth ? (

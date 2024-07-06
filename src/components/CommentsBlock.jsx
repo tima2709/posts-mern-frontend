@@ -24,7 +24,7 @@ const CommentsBlock = ({ items, children, isLoading = true }) => {
                             ) : (
                                 <ListItemText
                                     primary={obj.user.fullName}
-                                    secondary={obj.text}
+                                    secondary={obj.title}
                                 />
                             )}
                         </ListItem>
