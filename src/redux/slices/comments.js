@@ -3,12 +3,16 @@ import axios from "../../axios";
 
 
 export const getComments = createAsyncThunk('comments/getComments', async (postId) => {
-    const { data } = await axios.get(`/comments?postId=${postId}`); // Передаем postId как URL-параметр
+    const { data } = await axios.get(`/comments?postId=${postId}`); // postId => URL-параметр
+    return data;
+});
+
+export const getLastComments = createAsyncThunk('comments/getLastComments', async () => {
+    const { data } = await axios.get(`/lastComments`);
     return data;
 });
 
 export const addNewComments = createAsyncThunk('comments/addNewComments', async ({title, postId}) => {
-    console.log(title, postId)
     const {data} = await axios.post('/comments', {
         title,
         postId
@@ -21,6 +25,10 @@ const initialState = {
     comments: {
         items: [],
         comment: {},
+        status: 'loading'
+    },
+    lastComments: {
+        items: [],
         status: 'loading'
     }
 }
@@ -53,6 +61,18 @@ const commentSlice = createSlice({
             })
             .addCase(addNewComments.rejected, (state, action) => {
                 state.comments.comment = {};
+                state.comments.status = 'error'
+            })
+            .addCase(getLastComments.pending, (state) => {
+                state.lastComments.items = [];
+                state.comments.status = 'loading'
+            })
+            .addCase(getLastComments.fulfilled, (state, action) => {
+                state.lastComments.items = action.payload;
+                state.comments.status = 'loaded'
+            })
+            .addCase(getLastComments.rejected, (state, action) => {
+                state.lastComments.items = [];
                 state.comments.status = 'error'
             })
     }
